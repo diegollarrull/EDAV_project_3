@@ -8,4 +8,4 @@
 - Sergey Ulyanenko <su2196@columbia.edu>
 - Kourtney Alyssa Traina <k.traina@columbia.edu>
 
-Input data for the project is available [here][http://catalog.data.gov/dataset/traffic-violations-56dda].
+Input data for the project is available [here](http://catalog.data.gov/dataset/traffic-violations-56dda).

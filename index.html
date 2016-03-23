@@ -1,0 +1,35 @@
+
+<html>
+<head>
+  <title>A Leaflet map!</title>
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+  <!-- Scripts -->
+  <script src="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js"></script>
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+  <style>
+    #map{ height: 100% }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <script>
+
+  // Initialize the map.
+  var map = L.map('map').setView([38.8833, -97.0167], 5);
+
+  // Load title layer.
+  L.tileLayer('http://korona.geog.uni-heidelberg.de/tiles/roads/x={x}&y={y}&z={z}',
+    {
+      maxZoom: 10,
+      minZoom: 3,
+    }).addTo(map);
+
+  // Add csv data.
+  omnivore.csv('/test.csv').addTo(map);
+  </script>
+</body>
+</html>

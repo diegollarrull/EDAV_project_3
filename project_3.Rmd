@@ -1,0 +1,127 @@
+---
+title: EDAV Project 3 - Alcohol-related traffic violations in Montgomery county of
+  Maryland
+author: Aleksandr Makarov, Diego Llarrull, Kourtney Traina, Manuel Rueda, Ryan Walsh,
+  Sergey Ulyanenko
+date: "March 23, 2016"
+output: slidy_presentation
+---
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+#-------------
+#Loading and Cleaning Data
+#-------------
+library(dplyr)
+library(plyr)
+library(ggplot2)
+library(scales)
+library(ggmap)
+#mydata = read.csv('D:/Documents/Project_3/Traffic_Violations_alcohol.csv',header = TRUE)
+mydata = read.csv('/Users/sergeyulyanenko/Dropbox/Columbia University/1_EDAV W4701/Projects/Project_3/Traffic_Violations_alcohol.csv',header = TRUE)
+##Getting rid of NA values
+## % Share of alcohol related violations
+alc_share = data.frame(violation=c("non alcohol violations","alcohol violations"),count=c(815245,30653))
+alc_share$percent = alc_share$count / sum(alc_share$count) 
+alc_share$pos= cumsum(alc_share$percent) - 0.5 * alc_share$percent 
+ggplot(data=alc_share,aes(x=factor(1),y=percent,fill=factor(violation)))+
+  geom_bar(width=1,stat="identity")+
+  coord_polar(theta="y")+
+  geom_text(aes(x=1.1,y=pos,label=percent(percent)),size=5)+
+  ggtitle("% Share of alcohol related violations")+
+  xlab('')+ylab('percent')+labs(fill="Violation")+
+  scale_fill_brewer(palette = "Paired")+
+  theme_light()+
+  theme(legend.title=element_blank(), plot.title = element_text(size=15),
+        panel.grid=element_blank(),axis.text=element_blank(),
+        axis.title.x=element_blank(),legend.position="bottom")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by Year.
+mydata %>%
+  mutate(Year = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%Y"))) %>%
+  group_by(Year) %>%
+  tally() %>%
+  ggplot(aes(x=Year,y=n,fill=Year)) + geom_bar(stat = "identity") +
+  xlab('Year')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("Total Violations by Year")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Violations by hour
+
+mydata %>%
+  mutate(Time = format(as.POSIXct(mydata$Time.Of.Stop, format="%H"),"%H")) %>%
+  group_by(Time) %>%
+  tally() %>%
+  ggplot(aes(fill=n)) + geom_bar(aes(x=Time, y = n), stat = "identity") +
+  ggtitle("Total Violations per Hour")+
+  xlab('Time')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 0, hjust = 1))
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by weekday.
+mydata %>%
+  mutate(Time = weekdays(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  mutate(Weekday = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%w"))) %>%
+  group_by(Time,Weekday) %>%
+  tally() %>%
+  ggplot(aes(x=reorder(Time,Weekday),y=n,fill=Time)) + geom_bar(stat = "identity") +
+  xlab('Weekday')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("Total Violations by Weekday")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by month.
+mydata %>%
+  mutate(Time = months(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  mutate(Month = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%M"),"%M"))) %>%
+  group_by(Time,Month) %>%
+  tally() %>%
+  ggplot(aes(x=reorder(Time,Month),y=n,fill=Time)) + geom_bar(stat = "identity") +
+  xlab('Month')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("Total Violations by Month")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by race.
+race = ddply(mydata,.(Race),summarize,count=length(Race))
+race$percent = race$count / sum(race$count) 
+ggplot(data=race,aes(x=reorder(Race, -percent),y=percent,fill=factor(percent)))+
+  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.2)+
+  scale_y_continuous(labels=percent)+
+  xlab('Race')+ylab('percent')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  ggtitle("% Violations by Race")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by Gender
+gender = ddply(mydata,.(Gender),summarize,count=length(Gender))
+gender$percent = gender$count / sum(gender$count) 
+ggplot(data=gender,aes(x=Gender,y=percent,fill=factor(percent)))+
+  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.5)+
+  scale_y_continuous(labels=percent)+
+  xlab('Gender')+ylab('percent')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  ggtitle("% Violations by Gender")
+```
+---
+![](/Users/sergeyulyanenko/Dropbox/Columbia University/1_EDAV W4701/Projects/Project_3/images/ViolationsDistrictBar.png)
+---
+![](/Users/sergeyulyanenko/Dropbox/Columbia University/1_EDAV W4701/Projects/Project_3/images/Montgomery.png)
+---
+![](/Users/sergeyulyanenko/Dropbox/Columbia University/1_EDAV W4701/Projects/Project_3/images/Germantown.png)
+---
+![](/Users/sergeyulyanenko/Dropbox/Columbia University/1_EDAV W4701/Projects/Project_3/images/Rockville.png)
+---
+![](/Users/sergeyulyanenko/Dropbox/Columbia University/1_EDAV W4701/Projects/Project_3/images/North Bethesda.png)
+---

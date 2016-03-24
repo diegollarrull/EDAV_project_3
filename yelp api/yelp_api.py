@@ -44,11 +44,13 @@ BaseLon = -77.4
 lat_intervals = [float(i) / 10 for i in xrange(5)]
 lon_intervals = [float(i) / 10 for i in xrange(7)]
 
+
+
 for lat in lat_intervals:
     for lon in lon_intervals:
-        cll = str(BaseLat + lat) + ',' + str(BaseLon + lon)
-        print cll
-        response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', cll=cll, sort=1, limit=20, offset=0)
+        bounds = str(BaseLat + lat) + ',' + str(BaseLon + lon) + '|' + str(BaseLat + lat + 0.1) + ',' + str(BaseLon + lon + 0.1)
+        print bounds
+        response = yelp_api.search_query(term='alcohol',  bounds=bounds, sort=1, limit=20, offset=0)
         response_code = yelp_results_collection.insert(response)
         time.sleep(10)
 

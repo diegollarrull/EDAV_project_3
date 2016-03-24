@@ -32,9 +32,11 @@ yelp_api = YelpAPI(args.consumer_key, args.consumer_secret, args.token, args.tok
 #sortby=review_count
 
 yelp_results_collection.remove()
-response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=20)
+response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=0)
+response2 = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=20)
 response_code = yelp_results_collection.insert(response)
-Lats2 = yelp_results_collection.aggregate([{'$project':{'coords': '$businesses.location.coordinate'}}, { '$limit': 1 }])
+response_code2 = yelp_results_collection.insert(response2)
+Lats2 = yelp_results_collection.aggregate([{'$project':{'coords': '$businesses.location.coordinate'}}])
 
 f = open('./yelp.csv', 'w')
 csv_file = csv.writer(f)
@@ -43,3 +45,9 @@ writer.writeheader()
 for x in Lats2:
     for i in x['coords']:
         writer.writerow(i)
+
+
+All = yelp_results_collection.find()
+index = 0
+for i in All:
+    print i

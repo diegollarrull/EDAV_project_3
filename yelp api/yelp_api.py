@@ -63,7 +63,7 @@ Lats2 = yelp_results_collection.aggregate([{'$project': {'name' : '$id',
                                                          'latitude': '$location.coordinate.latitude',
                                                          'rating' : '$rating'}}])
 
-f = open('./yelp_rating_test.csv', 'w')
+f = open('./yelp_rating.csv', 'w')
 csv_file = csv.writer(f)
 writer = csv.DictWriter(f, fieldnames = ['_id','name','latitude','longitude','rating'])
 writer.writeheader()

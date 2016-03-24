@@ -50,8 +50,8 @@ for lat in lat_intervals:
      for lon in lon_intervals:
          bounds = str(BaseLat + lat) + ',' + str(BaseLon + lon) + '|' + str(BaseLat + lat + 0.1) + ',' + str(BaseLon + lon + 0.1)
          print bounds
-         response = yelp_api.search_query(term='nightlife alcohol',  bounds=bounds, sort=2, limit=20, offset=0)
-         response2 = yelp_api.search_query(term='nightlife alcohol', bounds=bounds, sort=2, limit=20, offset=20)
+         response = yelp_api.search_query(term='alcohol',  bounds=bounds, sort=2, limit=20, offset=0)
+         response2 = yelp_api.search_query(term='alcohol', bounds=bounds, sort=2, limit=20, offset=20)
          if response['businesses'] != []:
             response_code = yelp_results_collection.insert(response['businesses'])
          if response2['businesses'] != []:

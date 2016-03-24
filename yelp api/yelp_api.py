@@ -11,6 +11,7 @@ from pprint import pprint
 from pymongo import MongoClient
 import json
 import csv
+import time
 
 client = MongoClient('localhost', 27017)
 db = client.yelp_maryland
@@ -32,10 +33,26 @@ yelp_api = YelpAPI(args.consumer_key, args.consumer_secret, args.token, args.tok
 #sortby=review_count
 
 yelp_results_collection.remove()
-response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=0)
-response2 = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=20)
-response_code = yelp_results_collection.insert(response)
-response_code2 = yelp_results_collection.insert(response2)
+#response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=0)
+#response2 = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=20)
+#response_code = yelp_results_collection.insert(response)
+#response_code2 = yelp_results_collection.insert(response2)
+
+BaseLat = 38.9
+BaseLon = -77.4
+
+lat_intervals = [float(i) / 10 for i in xrange(5)]
+lon_intervals = [float(i) / 10 for i in xrange(7)]
+
+for lat in lat_intervals:
+    for lon in lon_intervals:
+        cll = str(BaseLat + lat) + ',' + str(BaseLon + lon)
+        print cll
+        response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', cll=cll, sort=1, limit=20, offset=0)
+        response_code = yelp_results_collection.insert(response)
+        time.sleep(10)
+
+
 Lats2 = yelp_results_collection.aggregate([{'$project':{'coords': '$businesses.location.coordinate'}}])
 
 f = open('./yelp.csv', 'w')
@@ -45,6 +62,8 @@ writer.writeheader()
 for x in Lats2:
     for i in x['coords']:
         writer.writerow(i)
+
+
 
 
 All = yelp_results_collection.find()

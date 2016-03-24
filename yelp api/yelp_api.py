@@ -47,28 +47,30 @@ lon_intervals = [float(i) / 10 for i in xrange(7)]
 
 
 for lat in lat_intervals:
-    for lon in lon_intervals:
-        bounds = str(BaseLat + lat) + ',' + str(BaseLon + lon) + '|' + str(BaseLat + lat + 0.1) + ',' + str(BaseLon + lon + 0.1)
-        print bounds
-        response = yelp_api.search_query(term='alcohol',  bounds=bounds, sort=1, limit=20, offset=0)
-        response_code = yelp_results_collection.insert(response)
-        time.sleep(10)
+     for lon in lon_intervals:
+         bounds = str(BaseLat + lat) + ',' + str(BaseLon + lon) + '|' + str(BaseLat + lat + 0.1) + ',' + str(BaseLon + lon + 0.1)
+         print bounds
+         response = yelp_api.search_query(term='nightlife alcohol',  bounds=bounds, sort=2, limit=20, offset=0)
+         response2 = yelp_api.search_query(term='nightlife alcohol', bounds=bounds, sort=2, limit=20, offset=20)
+         if response['businesses'] != []:
+            response_code = yelp_results_collection.insert(response['businesses'])
+         if response2['businesses'] != []:
+            response_code2 = yelp_results_collection.insert(response2['businesses'])
+         time.sleep(10)
 
+Lats2 = yelp_results_collection.aggregate([{'$project': {'name' : '$id',
+                                                         'longitude': '$location.coordinate.longitude',
+                                                         'latitude': '$location.coordinate.latitude',
+                                                         'rating' : '$rating'}}])
 
-Lats2 = yelp_results_collection.aggregate([{'$project':{'coords': '$businesses.location.coordinate'}}])
-
-f = open('./yelp.csv', 'w')
+f = open('./yelp_rating_test.csv', 'w')
 csv_file = csv.writer(f)
-writer = csv.DictWriter(f, fieldnames = ['latitude','longitude'])
+writer = csv.DictWriter(f, fieldnames = ['_id','name','latitude','longitude','rating'])
 writer.writeheader()
 for x in Lats2:
-    for i in x['coords']:
-        writer.writerow(i)
+    writer.writerow(x)
 
 
 
 
-All = yelp_results_collection.find()
-index = 0
-for i in All:
-    print i
+

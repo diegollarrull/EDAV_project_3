@@ -31,7 +31,9 @@ yelp_api = YelpAPI(args.consumer_key, args.consumer_secret, args.token, args.tok
 #attrs=BusinessParking.garage,BusinessParking.lot,BusinessParking.validated
 #sortby=review_count
 
-respose_code = yelp_results_collection.insert(response)
+yelp_results_collection.remove()
+response = yelp_api.search_query(term='alcohol', location='Montgomery County, MD', sort=2, limit=20, offset=20)
+response_code = yelp_results_collection.insert(response)
 Lats2 = yelp_results_collection.aggregate([{'$project':{'coords': '$businesses.location.coordinate'}}, { '$limit': 1 }])
 
 f = open('./yelp.csv', 'w')

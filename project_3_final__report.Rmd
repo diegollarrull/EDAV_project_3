@@ -144,28 +144,28 @@ mydata %>%
 ----
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Violations by race.
-race = ddply(mydata,.(Race),summarize,count=length(Race))
-race$percent = race$count / sum(race$count) 
-ggplot(data=race,aes(x=reorder(Race, -percent),y=percent,fill=factor(percent)))+
-  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.2)+
-  scale_y_continuous(labels=percent)+
-  xlab('Race')+ylab('percent')+
-  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
-  scale_colour_brewer()+
-  ggtitle("% Violations by Race")
+#race = ddply(mydata,.(Race),summarize,count=length(Race))
+#race$percent = race$count / sum(race$count) 
+#ggplot(data=race,aes(x=reorder(Race, -percent),y=percent,fill=factor(percent)))+
+#  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.2)+
+#  scale_y_continuous(labels=percent)+
+#  xlab('Race')+ylab('percent')+
+#  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+#  scale_colour_brewer()+
+#  ggtitle("% Violations by Race")
 ```
 ----
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Violations by Gender
-gender = ddply(mydata,.(Gender),summarize,count=length(Gender))
-gender$percent = gender$count / sum(gender$count) 
-ggplot(data=gender,aes(x=Gender,y=percent,fill=factor(percent)))+
-  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.5)+
-  scale_y_continuous(labels=percent)+
-  xlab('Gender')+ylab('percent')+
-  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
-  scale_colour_brewer()+
-  ggtitle("% Violations by Gender")
+# gender = ddply(mydata,.(Gender),summarize,count=length(Gender))
+# gender$percent = gender$count / sum(gender$count) 
+# ggplot(data=gender,aes(x=Gender,y=percent,fill=factor(percent)))+
+#   geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.5)+
+#   scale_y_continuous(labels=percent)+
+#   xlab('Gender')+ylab('percent')+
+#   theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+#   scale_colour_brewer()+
+#   ggtitle("% Violations by Gender")
 ```
 
 

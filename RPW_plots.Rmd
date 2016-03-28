@@ -8,6 +8,8 @@ output: pdf_document
 library(ggplot2)
 library(ggmap)
 library(MASS)
+library(gridExtra)
+library(grid)
 
 data <- read.csv('https://data.montgomerycountymd.gov/api/views/4mse-ku6q/rows.csv?accessType=DOWNLOAD')
 
@@ -39,14 +41,15 @@ There seems to be wide variation between police districts in how many alcohol vi
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 
-map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom = 11,maptype='roadmap')
+map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom = 11,maptype='roadmap',color = 'bw')
 
 ##map of sample (of the same number as alcohol violations) of all violations by district
 sample <-data[sample(dim(data)[1],dim(alcohol)[1]),]
-ggmap(map,extent = 'device') + 
+p1 <- ggmap(map,extent = 'device') + 
   geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .1, size = 2,data = sample) + 
   guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
-  ggtitle('Violations by District')
+  ggtitle('Violations by District') +
+  theme(legend.position = "none")
 
 ```
 From the plot of all types of violations by the officer's districts shows distinct boundaries between each district. Officer's crossing into other districts seems to be very rare.
@@ -54,11 +57,19 @@ From the plot of all types of violations by the officer's districts shows distin
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 
 ##map of alcohol violations only
-ggmap(map,extent = 'device') + 
+p2 <- ggmap(map,extent = 'device') + 
   geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .1, size = 2,data = alcohol) + 
   guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
-  ggtitle('Alcohol Violations by District')
+  ggtitle('Alcohol Violations by District') +
+  theme(legend.position='bottom')
 
+#code from http://stackoverflow.com/questions/13649473/add-a-common-legend-for-combined-ggplots
+plots <- list(p1, p2)
+g <- ggplotGrob(plots[[1]] + theme(legend.position="bottom"))$grobs
+legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+lheight <- sum(legend$height)
+tmp <- arrangeGrob(p1 + theme(legend.position = "none",panel.border = element_rect(colour = "black", fill=NA, size=2)), p2 + theme(legend.position = "none",panel.border = element_rect(colour = "black", fill=NA, size=2)), layout_matrix = matrix(c(1, 2), nrow = 1))
+grid.arrange(tmp, legend, ncol = 1, heights = unit.c(unit(1, "npc") - lheight, lheight))
 ```
 
 Looking only at alcohol violations, Gaithersburg's officers do not show up on the map nearly as much as other districts, and there is certainly more district cross-over for alcohol violations although still not much. Bethesda seems to have the most mixed group of officers making arrests.
@@ -72,7 +83,7 @@ alc_far = alcohol[(alcohol$Districts != predict(boundaries,alcohol)$class) & alc
 
 #plotting only violations outside of their boundary
 map2 <- get_map(location = c(lon = -77.099074, lat = 39.05359), zoom = 12,maptype='roadmap')
-ggmap(map2,extent = 'device') + 
+plot2 <- ggmap(map2,extent = 'device') + 
   geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .25, size = 2,data = alc_far) + 
   guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
   ggtitle('Alcohol Violations from Out of District Officer')

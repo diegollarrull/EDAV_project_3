@@ -7,6 +7,7 @@ output: pdf_document
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 library(ggplot2)
 library(ggmap)
+library(MASS)
 
 data <- read.csv('https://data.montgomerycountymd.gov/api/views/4mse-ku6q/rows.csv?accessType=DOWNLOAD')
 
@@ -34,6 +35,7 @@ ggplot(districts,aes(x = District,y=as.numeric(Proportion)/100)) +
 
 ```
 
+There seems to be wide variation between police districts in how many alcohol violations are given out by police district. Bethesda and Gaithersburg's alcohol violations account for less than half their overall share of violations. Meanwhile Silver Spring and Rockville give out slightly more along with the HQ which doesn't have a geographic boundary. The variation is most likely either the prevalence of drinking and driving in the district perhaps due to bar scenes or it could be the result of the police making it a higher priority relative to other violations.
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 
@@ -47,7 +49,7 @@ ggmap(map,extent = 'device') +
   ggtitle('Violations by District')
 
 ```
-
+From the plot of all types of violations by the officer's districts shows distinct boundaries between each district. Officer's crossing into other districts seems to be very rare.
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 
@@ -59,3 +61,22 @@ ggmap(map,extent = 'device') +
 
 ```
 
+Looking only at alcohol violations, Gaithersburg's officers do not show up on the map nearly as much as other districts, and there is certainly more district cross-over for alcohol violations although still not much. Bethesda seems to have the most mixed group of officers making arrests.
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+
+#estimating the boundaries for the districts
+boundaries = qda(Districts ~ New.Lat + New.Lon,data = alcohol)
+alc_far = alcohol[(alcohol$Districts != predict(boundaries,alcohol)$class) & alcohol$Districts!="HQ",]
+
+#plotting only violations outside of their boundary
+map2 <- get_map(location = c(lon = -77.099074, lat = 39.05359), zoom = 12,maptype='roadmap')
+ggmap(map2,extent = 'device') + 
+  geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .25, size = 2,data = alc_far) + 
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
+  ggtitle('Alcohol Violations from Out of District Officer')
+
+```
+
+Looking only at alcohol violations given by officers outside of their district. It is clear that Bethesda is the main location for these types of violations whereas Silver Spring has almost none. Since Bethesda's officers gives out few alcohol violations overall and Silver Springs give out more, this suggests that the district shares reflects the priorities or resources of those police departments rather than people being better behaved in those areas. Silver Spring's officers fully police there area and others while Bethesda is receiving help from the other districts.

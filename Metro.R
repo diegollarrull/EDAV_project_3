@@ -17,10 +17,13 @@ write.csv(dat, "fixed_violations.csv")
 ##################
 
 #metro
-metro <- read.xlsx('MetroStops.xlsx', sheetIndex = 1, rowIndex = 1:14, colIndex = 1:5)
+metro <- read.csv('MetroStops.csv')
+metro$Parking <- as.numeric(metro$Parking)
+metro$Passengers.Daily <- as.numeric(metro$Passengers.Daily)
 
 ## General map.
 map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom =11, maptype = "roadmap")
+
 
 alcohol.map <- ggmap(map,  extent="panel") %+%
   unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +

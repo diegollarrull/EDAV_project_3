@@ -7,7 +7,14 @@ date: "March 23, 2016"
 output: html_document
 ---
 
-One of the most relevant application fields in Data Science is city planning
+With this project, we aim to present a simple yet cohesive and concluding approach to one of the most relevant application fields in Data Science: smart city planning. For this purpose, we targeted a relatively small and simple dataset that contains all traffic violations during 2015 in Montgomery County, Maryland. This dataset, though simple, provides very accurate and descriptive information on the nature of the traffic violations. In particular, we will focus on traffic violations with a specific nature: alcohol consumption-driven traffic violations. We chose this particular subset in order to provide sound and conclusive insight on how to potentially reduce those traffic violations, which are responsible for a significant amount of deaths and injuries.
+
+This project is divided in three sections: in the first one, we will provide some preliminar information in order to describe the dataset and explore how traffic violations are distributed considering different dimensions. Subsequently, we will proceed to overlay traffic violations with bars serving alcohol, as a means to show potential explanations to the nature and number of these traffic violations. Similarly, we will also overlay metropolitan transportation stops in order to assess the relative proximity of these stops to the bars whose attendants seem to incur in a high number of traffic violations. Finally, we will provide conclusions and guidelines on possible means to optimise the public transportation stop layout and transportation frequency in order to possible reduce the number of traffic violations caused by alcohol consuption. 
+
+##The Montgomery County Data Set}
+
+
+From the entire dataset, and as depicted in the plot below, we will only focus on alcohol-induced traffic violations, which only constitute $3.6%$ of the entire dataset. Even though this proportion might seem small, in subsequent sections we will show that the volume of data is adequate to provide insight on the current situation in the county of Montgomery.
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -26,14 +33,14 @@ library(animation)
 mydata = read.csv('~/Documents/workspace/EDAV_project_3/clean-data/Traffic_Violations_alcohol.csv',header = TRUE)
 ##Getting rid of NA values
 ## % Share of alcohol related violations
-alc_share = data.frame(violation=c("non alcohol violations","alcohol violations"),count=c(815245,30653))
+alc_share = data.frame(violation=c("Non-alcohol violations","Alcohol violations"),count=c(815245,30653))
 alc_share$percent = alc_share$count / sum(alc_share$count) 
 alc_share$pos= cumsum(alc_share$percent) - 0.5 * alc_share$percent 
 ggplot(data=alc_share,aes(x=factor(1),y=percent,fill=factor(violation)))+
   geom_bar(width=1,stat="identity")+
   coord_polar(theta="y")+
   geom_text(aes(x=1.1,y=pos,label=percent(percent)),size=5)+
-  ggtitle("% Share of alcohol related violations")+
+  ggtitle("Percentage share of alcohol related violations")+
   xlab('')+ylab('percent')+labs(fill="Violation")+
   scale_fill_brewer(palette = "Paired")+
   theme_light()+
@@ -101,6 +108,7 @@ mydata %>%
   xlab('Weekday')+ylab('Number of violations')+
   theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
                       axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_brewer()+
   ggtitle("Total Violations by Weekday")
 ```
 ----
@@ -115,6 +123,7 @@ mydata %>%
   xlab('Month')+ylab('Number of violations')+
   theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
                       axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_brewer()+
   ggtitle("Total Violations by Month")
 ```
 ----
@@ -127,6 +136,7 @@ ggplot(data=race,aes(x=reorder(Race, -percent),y=percent,fill=factor(percent)))+
   scale_y_continuous(labels=percent)+
   xlab('Race')+ylab('percent')+
   theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  scale_colour_brewer()+
   ggtitle("% Violations by Race")
 ```
 ----
@@ -139,20 +149,10 @@ ggplot(data=gender,aes(x=Gender,y=percent,fill=factor(percent)))+
   scale_y_continuous(labels=percent)+
   xlab('Gender')+ylab('percent')+
   theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  scale_colour_brewer()+
   ggtitle("% Violations by Gender")
 ```
----
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-## Violations by Make
-color = ddply(mydata,.(Color),summarize,count=length(Color))
-color$percent = color$count / sum(color$count) 
-ggplot(data=color,aes(x=Color,y=percent,fill=factor(percent)))+
-  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.5)+
-  scale_y_continuous(labels=percent)+
-  xlab('Gender')+ylab('percent')+
-  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
-  ggtitle("% Violations by Gender")
-```
+
 
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}

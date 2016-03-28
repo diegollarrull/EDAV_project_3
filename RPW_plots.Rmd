@@ -41,7 +41,7 @@ There seems to be wide variation between police districts in how many alcohol vi
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 
-map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom = 11,maptype='roadmap',color = 'bw')
+map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom = 11,maptype='roadmap')
 
 ##map of sample (of the same number as alcohol violations) of all violations by district
 sample <-data[sample(dim(data)[1],dim(alcohol)[1]),]

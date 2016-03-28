@@ -122,7 +122,7 @@ mydata %>%
   theme(strip.background=element_rect(fill="dark gray"),legend.position = "none",plot.title = element_text(size=15),axis.text.x = element_text(angle = 0, hjust = 1))
 ```
 
-We can clearly see, then, that this behaviour pattern (traffic violations occuring during late night and early morning hours) is repeated throughout the entire week, almost the highest proportion can be found in weekend days.
+We can clearly see, then, that this behaviour pattern (traffic violations occuring during late night and early morning hours) is repeated throughout the entire week, almost the highest proportion can be found in weekend days. As a final step, it is important to be able to discern if the pattern occurs during the entire year. If so, then we can actually conclude that nightlife during weekends is indeed the main root of these violations. 
 
 ----
 
@@ -142,6 +142,8 @@ mydata %>%
   ggtitle("Total Violations by Month")
 ```
 ----
+In the plot above, even if we see a slight increase in traffic violations during the months of November and December, the number of violations per month do not differ significantly. Hence, we can conclude that applying measures during the weekends will take effect the entire year, which is a more than desirable characteristic for any measures we can suggest. 
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Violations by race.
 #race = ddply(mydata,.(Race),summarize,count=length(Race))
@@ -184,6 +186,7 @@ levels(data$Districts) = c('Rockville','Bethesda','Silver Spring','Wheaton','Ger
 alcohol <- data[grepl('ALCOHOL',data$Description),]
 ```
 
+## Police districts
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 

@@ -4,21 +4,24 @@ title: EDAV Project 3 - Alcohol-related traffic violations in Montgomery county 
 author: Aleksandr Makarov, Diego Llarrull, Kourtney Traina, Manuel Rueda, Ryan Walsh,
   Sergey Ulyanenko
 date: "March 23, 2016"
-output: pdf_document
+output: html_document
 ---
 
-This project takes as
+One of the most relevant application fields in Data Science is city planning
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 #-------------
 #Loading and Cleaning Data
 #-------------
-library(dplyr)
+library(RColorBrewer)
 library(plyr)
+library(dplyr)
 library(ggplot2)
 library(scales)
 library(ggmap)
+library(animation)
+
 #mydata = read.csv('D:/Documents/Project_3/Traffic_Violations_alcohol.csv',header = TRUE)
 mydata = read.csv('~/Documents/workspace/EDAV_project_3/clean-data/Traffic_Violations_alcohol.csv',header = TRUE)
 ##Getting rid of NA values
@@ -153,8 +156,6 @@ ggplot(data=color,aes(x=Color,y=percent,fill=factor(percent)))+
 
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-library(ggplot2)
-library(ggmap)
 
 #data <- read.csv('https://data.montgomerycountymd.gov/api/views/4mse-ku6q/rows.csv?accessType=DOWNLOAD')
 data <- mydata
@@ -211,11 +212,6 @@ ggmap(map,extent = 'device') +
 
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-library(RColorBrewer)
-library(dplyr)
-library(ggplot2)
-
-
 #dat <- read.csv("clean-data/Traffic_Violations_alcohol.csv", stringsAsFactors = F)
 dat <- mydata
 
@@ -269,10 +265,6 @@ seatbelt_injury2
 
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
-library(dplyr)
-library(ggplot2)
-library(ggmap)
-library(animation)
 
 #################
 ## Exploratory ##

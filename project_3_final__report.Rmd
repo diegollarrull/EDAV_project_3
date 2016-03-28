@@ -7,14 +7,14 @@ date: "March 23, 2016"
 output: html_document
 ---
 
-With this project, we aim to present a simple yet cohesive and concluding approach to one of the most relevant application fields in Data Science: smart city planning. For this purpose, we targeted a relatively small and simple dataset that contains all traffic violations during 2015 in Montgomery County, Maryland. This dataset, though simple, provides very accurate and descriptive information on the nature of the traffic violations. In particular, we will focus on traffic violations with a specific nature: alcohol consumption-driven traffic violations. We chose this particular subset in order to provide sound and conclusive insight on how to potentially reduce those traffic violations, which are responsible for a significant amount of deaths and injuries.
+With this project, we aim to present a simple yet cohesive and concluding approach to one of the most relevant application fields in Data Science: smart city planning. For this purpose, we targeted a relatively small and simple dataset that contains all traffic violations since 2012 in Montgomery County, Maryland. This dataset, though simple, provides very accurate and descriptive information on the nature of the traffic violations. In particular, we will focus on traffic violations with a specific nature: alcohol consumption-driven traffic violations. We chose this particular subset in order to provide sound and conclusive insight on how to potentially reduce those traffic violations, which are responsible for a significant amount of deaths and injuries.
 
 This project is divided in three sections: in the first one, we will provide some preliminar information in order to describe the dataset and explore how traffic violations are distributed considering different dimensions. Subsequently, we will proceed to overlay traffic violations with bars serving alcohol, as a means to show potential explanations to the nature and number of these traffic violations. Similarly, we will also overlay metropolitan transportation stops in order to assess the relative proximity of these stops to the bars whose attendants seem to incur in a high number of traffic violations. Finally, we will provide conclusions and guidelines on possible means to optimise the public transportation stop layout and transportation frequency in order to possible reduce the number of traffic violations caused by alcohol consuption. 
 
 ##The Montgomery County Data Set}
 
 
-From the entire dataset, and as depicted in the plot below, we will only focus on alcohol-induced traffic violations, which only constitute $3.6%$ of the entire dataset. Even though this proportion might seem small, in subsequent sections we will show that the volume of data is adequate to provide insight on the current situation in the county of Montgomery.
+From the entire dataset, and as depicted in the plot below, we will only focus on alcohol-induced traffic violations, which only constitute $3.6\%$ of the entire dataset. Even though this proportion might seem small, in subsequent sections we will show that the volume of data is adequate to provide insight on the current situation in the county of Montgomery.
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -49,6 +49,9 @@ ggplot(data=alc_share,aes(x=factor(1),y=percent,fill=factor(violation)))+
         axis.title.x=element_blank(),legend.position="bottom")
 ```
 ----
+
+As the plot below shows, the number of traffic violations triggered by alcohol consumption has been steadily increasing over year, and the trend for 2016 seems to go in the same direction. Consequently, we consider that tackling ways to reduce this number is not only reasonable but also desired.
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Violations by Year.
 mydata %>%
@@ -62,6 +65,9 @@ mydata %>%
   ggtitle("Total Violations by Year")
 ```
 ----
+
+In order to understand the nature of these traffic violations, we decided to analyse the time of occurrence of this violations, considering three different axes: **day**, **time of the day** and the combination of both axes (**time of the day over each day**, displayed as a trellis plot). All three plots are displayed below:
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 ## Violations by hour
@@ -78,6 +84,25 @@ mydata %>%
                       axis.text.x = element_text(angle = 0, hjust = 1))
 ```
 ----
+It can clearly be seen that late night and early morning hours present the highest proportion of traffic violations, which immediately suggest nightlife activity as the main root for these traffic violations. This is also supported by the following plot, which shows that most traffic violations occur during weekend days (that is, Friday, Saturday and Sunday).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by weekday.
+mydata %>%
+  mutate(Time = weekdays(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  mutate(Weekday = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%w"))) %>%
+  group_by(Time,Weekday) %>%
+  tally() %>%
+  ggplot(aes(x=reorder(Time,Weekday),y=n,fill=Time)) + geom_bar(stat = "identity") +
+  xlab('Weekday')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_brewer()+
+  ggtitle("Total Violations by Weekday")
+```
+----
+Since this information is not enough to actually conclude that this global pattern is also local, that is, that there is no special day where traffic violations occur at night, we decided to display a Trellis plot that breaks the previous information on a day-by-day basis: 
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 ## Violations by Weekday per Hour(Trellis plot)
@@ -96,22 +121,12 @@ mydata %>%
   theme_light()+
   theme(strip.background=element_rect(fill="dark gray"),legend.position = "none",plot.title = element_text(size=15),axis.text.x = element_text(angle = 0, hjust = 1))
 ```
+
+We can clearly see, then, that this behaviour pattern (traffic violations occuring during late night and early morning hours) is repeated throughout the entire week, almost the highest proportion can be found in weekend days.
+
 ----
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-## Violations by weekday.
-mydata %>%
-  mutate(Time = weekdays(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
-  mutate(Weekday = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%w"))) %>%
-  group_by(Time,Weekday) %>%
-  tally() %>%
-  ggplot(aes(x=reorder(Time,Weekday),y=n,fill=Time)) + geom_bar(stat = "identity") +
-  xlab('Weekday')+ylab('Number of violations')+
-  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
-                      axis.text.x = element_text(angle = 45, hjust = 1))+
-  scale_colour_brewer()+
-  ggtitle("Total Violations by Weekday")
-```
-----
+
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Violations by month.
 mydata %>%

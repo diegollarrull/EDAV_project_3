@@ -83,7 +83,7 @@ alc_far = alcohol[(alcohol$Districts != predict(boundaries,alcohol)$class) & alc
 
 #plotting only violations outside of their boundary
 map2 <- get_map(location = c(lon = -77.099074, lat = 39.05359), zoom = 12,maptype='roadmap')
-plot2 <- ggmap(map2,extent = 'device') + 
+ggmap(map2,extent = 'device') + 
   geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .25, size = 2,data = alc_far) + 
   guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
   ggtitle('Alcohol Violations from Out of District Officer')

@@ -1,0 +1,554 @@
+---
+title: EDAV Project 3 - Alcohol-related traffic violations in Montgomery county of
+  Maryland
+author: Aleksandr Makarov, Diego Llarrull, Kourtney Traina, Manuel Rueda, Ryan Walsh,
+  Sergey Ulyanenko
+date: "March 23, 2016"
+output: pdf_document
+---
+
+This project takes as
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+#-------------
+#Loading and Cleaning Data
+#-------------
+library(dplyr)
+library(plyr)
+library(ggplot2)
+library(scales)
+library(ggmap)
+#mydata = read.csv('D:/Documents/Project_3/Traffic_Violations_alcohol.csv',header = TRUE)
+mydata = read.csv('~/Documents/workspace/EDAV_project_3/clean-data/Traffic_Violations_alcohol.csv',header = TRUE)
+##Getting rid of NA values
+## % Share of alcohol related violations
+alc_share = data.frame(violation=c("non alcohol violations","alcohol violations"),count=c(815245,30653))
+alc_share$percent = alc_share$count / sum(alc_share$count) 
+alc_share$pos= cumsum(alc_share$percent) - 0.5 * alc_share$percent 
+ggplot(data=alc_share,aes(x=factor(1),y=percent,fill=factor(violation)))+
+  geom_bar(width=1,stat="identity")+
+  coord_polar(theta="y")+
+  geom_text(aes(x=1.1,y=pos,label=percent(percent)),size=5)+
+  ggtitle("% Share of alcohol related violations")+
+  xlab('')+ylab('percent')+labs(fill="Violation")+
+  scale_fill_brewer(palette = "Paired")+
+  theme_light()+
+  theme(legend.title=element_blank(), plot.title = element_text(size=15),
+        panel.grid=element_blank(),axis.text=element_blank(),
+        axis.title.x=element_blank(),legend.position="bottom")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by Year.
+mydata %>%
+  mutate(Year = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%Y"))) %>%
+  group_by(Year) %>%
+  tally() %>%
+  ggplot(aes(x=Year,y=n,fill=Year)) + geom_bar(stat = "identity") +
+  xlab('Year')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("Total Violations by Year")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Violations by hour
+
+mydata %>%
+  mutate(Time = format(as.POSIXct(mydata$Time.Of.Stop, format="%H"),"%H")) %>%
+  group_by(Time) %>%
+  tally() %>%
+  ggplot(aes(fill=n)) + geom_bar(aes(x=Time, y = n), stat = "identity") +
+  ggtitle("Total Violations per Hour")+
+  xlab('Hour')+
+  ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 0, hjust = 1))
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Violations by Weekday per Hour(Trellis plot)
+mydata %>%
+  mutate(Time = as.numeric(format(as.POSIXct(mydata$Time.Of.Stop, format="%H"),"%H"))) %>%
+  mutate(Weekday = factor(as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%w")),labels=c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"))) %>%
+  group_by(Time, Weekday) %>%
+  tally() %>%
+  ggplot(aes(x=Time, y = n,fill=n))+
+  geom_bar(stat = "identity") +
+  facet_wrap(~ Weekday)+
+  ggtitle("Total Violations By Weekday per Hour")+
+  xlab('Hour')+
+  ylab('Number of violations')+
+  scale_x_continuous()+
+  theme_light()+
+  theme(strip.background=element_rect(fill="dark gray"),legend.position = "none",plot.title = element_text(size=15),axis.text.x = element_text(angle = 0, hjust = 1))
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by weekday.
+mydata %>%
+  mutate(Time = weekdays(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  mutate(Weekday = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%w"))) %>%
+  group_by(Time,Weekday) %>%
+  tally() %>%
+  ggplot(aes(x=reorder(Time,Weekday),y=n,fill=Time)) + geom_bar(stat = "identity") +
+  xlab('Weekday')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("Total Violations by Weekday")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by month.
+mydata %>%
+  mutate(Time = months(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  mutate(Month = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%M"),"%M"))) %>%
+  group_by(Time,Month) %>%
+  tally() %>%
+  ggplot(aes(x=reorder(Time,Month),y=n,fill=Time)) + geom_bar(stat = "identity") +
+  xlab('Month')+ylab('Number of violations')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("Total Violations by Month")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by race.
+race = ddply(mydata,.(Race),summarize,count=length(Race))
+race$percent = race$count / sum(race$count) 
+ggplot(data=race,aes(x=reorder(Race, -percent),y=percent,fill=factor(percent)))+
+  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.2)+
+  scale_y_continuous(labels=percent)+
+  xlab('Race')+ylab('percent')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  ggtitle("% Violations by Race")
+```
+----
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by Gender
+gender = ddply(mydata,.(Gender),summarize,count=length(Gender))
+gender$percent = gender$count / sum(gender$count) 
+ggplot(data=gender,aes(x=Gender,y=percent,fill=factor(percent)))+
+  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.5)+
+  scale_y_continuous(labels=percent)+
+  xlab('Gender')+ylab('percent')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  ggtitle("% Violations by Gender")
+```
+---
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Violations by Make
+color = ddply(mydata,.(Color),summarize,count=length(Color))
+color$percent = color$count / sum(color$count) 
+ggplot(data=color,aes(x=Color,y=percent,fill=factor(percent)))+
+  geom_bar(stat="identity")+geom_text(aes(label=paste(round(percent*100,1),"%"),y=percent+0.012), size=5,vjust=-0.5)+
+  scale_y_continuous(labels=percent)+
+  xlab('Gender')+ylab('percent')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15))+
+  ggtitle("% Violations by Gender")
+```
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(ggplot2)
+library(ggmap)
+
+#data <- read.csv('https://data.montgomerycountymd.gov/api/views/4mse-ku6q/rows.csv?accessType=DOWNLOAD')
+data <- mydata
+
+data <- data[!is.na(data$Geolocation) & data$Geolocation!='',]
+data$New.Lat <- pmax(data$Latitude, data$Longitude)
+data$New.Lon <- pmin(data$Latitude, data$Longitude)
+data$Districts = data$SubAgency
+levels(data$Districts) = c('Rockville','Bethesda','Silver Spring','Wheaton','Germantown','Gaithersburg','HQ')
+
+alcohol <- data[grepl('ALCOHOL',data$Description),]
+```
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+
+##Violation proportions by district
+districts = as.data.frame(rbind(cbind(rep('All',7),levels(alcohol$Districts),summary(data$SubAgency)/dim(data)[1]),cbind(rep('Alcohol',7),levels(alcohol$Districts),summary(alcohol$SubAgency)/dim(alcohol)[1])))
+colnames(districts) <- c('Group','District','Proportion')
+
+ggplot(districts,aes(x = District,y=as.numeric(Proportion)/100)) + 
+  geom_bar(aes(fill=Group),stat = 'identity', position='dodge') + 
+  scale_fill_manual(values=c("midnightblue", "slategray2")) + 
+  ggtitle('Violations by Police District') + 
+  scale_y_continuous(name='Proportion',labels = scales::percent)
+
+```
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+
+map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom = 11,maptype='roadmap')
+
+##map of sample (of the same number as alcohol violations) of all violations by district
+sample <-data[sample(dim(data)[1],dim(alcohol)[1]),]
+ggmap(map,extent = 'device') + 
+  geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .1, size = 2,data = sample) + 
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
+  ggtitle('Violations by District')
+
+```
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+
+##map of alcohol violations only
+ggmap(map,extent = 'device') + 
+  geom_point(aes(x=New.Lon, y = New.Lat, color = Districts), alpha = .1, size = 2,data = alcohol) + 
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) + 
+  ggtitle('Alcohol Violations by District')
+
+```
+
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(RColorBrewer)
+library(dplyr)
+library(ggplot2)
+
+
+#dat <- read.csv("clean-data/Traffic_Violations_alcohol.csv", stringsAsFactors = F)
+dat <- mydata
+
+#dataframe of stops with of fatalities or injuries
+dat_fatal <- dat %>%
+  filter(Fatal == 'Yes' | Personal.Injury == "Yes")
+
+#Ensure the car makes are uniform
+dat_fatal$Make[dat_fatal$Make == "HOND"] = "HONDA"
+dat_fatal$Make[dat_fatal$Make == "CHRYS"] = "CHRYSLER"
+dat_fatal$Make[dat_fatal$Make == "MITS"] = "MITSUBISHI"
+dat_fatal$Make[dat_fatal$Make == "MERC"] = "MERCURY"
+dat_fatal$Make[dat_fatal$Make == "ACUR"] = "ACURA"
+dat_fatal$Make[dat_fatal$Make == "CHEV"] = "CHEVROLET"
+dat_fatal$Make[dat_fatal$Make == "CHEVY"] = "CHEVROLET"
+dat_fatal$Make[dat_fatal$Make == "CHRY"] = "CHRYSLER"
+dat_fatal$Make[dat_fatal$Make == "DODG"] = "DODGE"
+dat_fatal$Make[dat_fatal$Make == "HYUN"] = "HYUNDAI"
+dat_fatal$Make[dat_fatal$Make == "MADZA"] = "MAZDA"
+dat_fatal$Make[dat_fatal$Make == "VOLV"] = "VOLVO"
+dat_fatal$Make[dat_fatal$Make == "TOYT"] = "TOYOTA"
+dat_fatal$Make[dat_fatal$Make == "VOLKS"] = "VOLKSWAGON"
+dat_fatal$Make[dat_fatal$Make == "TOYO"] = "TOYOTA"
+dat_fatal$Make[dat_fatal$Make == "MERCEDEZ"] = "MERCEDES"
+dat_fatal$Make[dat_fatal$Make == "HYUNDIA"] = "HYUNDAI"
+dat_fatal$Make[dat_fatal$Make == "INFI"] = "INFINITY"
+dat_fatal$Make[dat_fatal$Make == "IZUZU"] = "ISUZU"
+dat_fatal$Make[dat_fatal$Make == "NISS"] = "NISSAN"
+dat_fatal$Make[dat_fatal$Make == "NISSIAN"] = "NISSAN"
+dat_fatal$Make[dat_fatal$Make == "TOTY"] = "TOYOTA"
+
+#car make and injuries
+make_injury <- ggplot(dat_fatal, aes(factor(Make)))
+make_injury + geom_bar() + theme(axis.text.x = element_text(angle = 90))
+
+
+#car make and injuries, separated by police subagency
+make_injury_agency <- ggplot(dat_fatal, aes(factor(Make), fill = SubAgency)) + 
+  geom_bar() + theme(axis.text.x = element_text(angle = 90))
+make_injury_agency
+
+#seatbelts and injury??? This doesn't seem right?
+#seatbelts for all alcohol related stops
+seatbelt_injury <- ggplot(dat, aes(factor(Belts))) + geom_bar()
+seatbelt_injury
+
+#seatbelts for alcohol-related stops with injuries or fatalities
+seatbelt_injury2 <- ggplot(dat_fatal, aes(factor(Belts))) + geom_bar()
+seatbelt_injury2
+````
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(animation)
+
+#################
+## Exploratory ##
+#################
+
+yelp <- read.csv("yelp api/yelp.csv")
+yelp_rating <- read.csv("yelp api/yelp_rating.csv")
+yelp_distance <- read.csv("yelp api/yelp_distance.csv")
+
+dat <- read.csv("clean-data/Traffic_Violations_alcohol.csv", stringsAsFactors = F)
+## Latitude and longitude coordinates are (sometimes) incorrect...
+dat$New.Lat <- pmax(dat$Latitude, dat$Longitude)
+dat$New.Lon <- pmin(dat$Latitude, dat$Longitude)
+dat$Date.Of.Stop <- as.Date(dat$Date.Of.Stop, format = "%m/%d/%Y")
+
+write.csv(dat, "fixed_violations.csv")
+
+## Violations by minute.
+dat %>%
+  mutate(Time = as.POSIXct(Time.Of.Stop, format="%H:%M:%S")) %>%
+  group_by(Time) %>%
+  tally() %>%
+  ggplot() + geom_bar(aes(x=Time, y = n), stat = "identity") +
+  theme_bw() + ggtitle("Total Violations per Hour")
+
+## Violations by weekday.
+dat %>%
+  mutate(Time = weekdays(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  group_by(Time) %>%
+  tally() %>%
+  ggplot() + geom_bar(aes(x=Time, y = n), stat = "identity") +
+  theme_bw() + ggtitle("Total Violations per Weekday")
+
+## Violations by month.
+dat %>%
+  mutate(Time = months(as.Date(Date.Of.Stop, format="%m/%d/%Y"))) %>%
+  group_by(Time) %>%
+  tally() %>%
+  ggplot() + geom_bar(aes(x=Time, y = n), stat = "identity") +
+  theme_bw() + ggtitle("Total Violations per Month")
+
+## Violations by race.
+dat %>%
+  group_by(Race) %>%
+  tally() %>%
+  ggplot() + geom_bar(aes(x=Race, y = n), stat = "identity") +
+  theme_bw() + ggtitle("Total Violations per Month")
+
+##################
+## Geo-mapping. ##
+##################
+test.dat <- dat[sample(nrow(dat)),] %>%
+  select(Location, Latitude, Longitude) %>%
+  filter(!is.na(Latitude)) %>%
+  head(500)
+
+## General map.
+map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom =11, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.1, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "Montgomery County, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
+  geom_point(data = unique(yelp_rating[yelp_rating$rating >= 3.5,]),
+             aes(x = longitude, y = latitude, alpha = 6**rating, size = 2**rating),
+             fill="black", shape=23) + 
+  scale_alpha(range = c(0.4, 0.8))
+
+
+## Zoom 1.
+map <- get_map(location = c(lon = -77.26, lat = 39.18), zoom =13, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "Germantown, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
+  geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
+             aes(x = longitude, y = latitude, size = rating),
+             fill="black", shape=23, alpha = 0.8) + 
+  scale_alpha(range = c(0.4, 0.8))
+
+## Zoom 2.
+map <- get_map(location = c(lon = -77.15, lat = 39.09), zoom =14, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "Rockville, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
+  geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
+             aes(x = longitude, y = latitude, size = rating),
+             fill="black", shape=23, alpha = 0.8) + 
+  scale_alpha(range = c(0.4, 0.8))
+
+## Zoom 3.
+map <- get_map(location = c(lon = -77.1, lat = 39.06), zoom =13, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "North Bethesda, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
+  geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
+             aes(x = longitude, y = latitude, size = rating),
+             fill="black", shape=23, alpha = 0.8) + 
+  scale_alpha(range = c(0.4, 0.8))
+
+##################
+## Single Day M ##
+##################
+
+## Animation of indicents throughout the day.
+dat %>%
+  group_by(Date.Of.Stop) %>%
+  tally(sort = T) %>%
+  head(1)
+
+## December 20th. Format Data.
+bad.day <- as.Date("12/20/2014", format = "%m/%d/%Y")
+bad.dat <- dat[dat$Date.Of.Stop == bad.day & !is.na(dat$New.Lat),]
+
+bad.dat$Time <- as.POSIXct(paste(bad.dat$Date.Of.Stop, bad.dat$Time.Of.Stop), format = "%Y-%m-%d %H:%M:%S")
+bad.min <- min(bad.dat$Time.Of.Stop)
+bad.max <- max(bad.dat$Time.Of.Stop)
+
+frame1 <- data.frame(matrix(0, nrow = 751, ncol = 1))
+names(frame1) = c("Time")
+t1 <- seq.POSIXt(as.POSIXct("12/20/2014 17:30", format = "%m/%d/%Y %H:%M"),
+                         as.POSIXct("12/20/2014 23:59", format = "%m/%d/%Y %H:%M"), by = "min")
+t2 <- seq.POSIXt(as.POSIXct("12/20/2014 00:00", format = "%m/%d/%Y %H:%M"),
+                 as.POSIXct("12/20/2014 06:00", format = "%m/%d/%Y %H:%M"), by = "min")
+frame1$Time <- c(t1, t2)
+
+## Final time data frame.
+frame2 <- frame1 %>%
+  left_join(unique(bad.dat[c("Time", "New.Lat", "New.Lon", "Personal.Injury")]), by = "Time") %>%
+  mutate(Impact = 0)
+
+frame2$Personal.Injury <- ifelse(is.na(frame2$Personal.Injury), 0, 1)
+frame2[is.na(frame2$New.Lat),c(2,3)] <- 0
+
+i <- which(frame2$New.Lat != 0)
+
+## Add a "size" component.
+frame2[i,]$Impact <- 5
+frame2[i+1,c("New.Lat", "New.Lon")] <- frame2[i,c("New.Lat", "New.Lon")]
+frame2[i+1,]$Impact <- 3
+frame2[i+2,c("New.Lat", "New.Lon")] <- frame2[i,c("New.Lat", "New.Lon")]
+frame2[i+2,]$Impact <- 1
+
+## Make final GIF!!!
+map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom =10 , maptype = "roadmap")
+
+##saveGIF({
+#  for(i in 1:nrow(frame2)) {
+#    
+#    night.map <- ggmap(map, extent="panel") %+%
+#      frame2[i,] +
+#      geom_point(fill="red", shape=21) +
+#      aes(x = New.Lon, y = New.Lat, size = "Impact") +
+#      labs(x = "Longitude", y = "Latitude") +
+#      theme(legend.position = "none") +
+#      coord_map() + ggtitle(paste("Montgomery County, MD - ", frame2[i,]$Time))
+#      
+#    print(night.map)
+#  }
+#}, movie.name = "violations.gif", interval = 0.1, ani.width = 400, ani.height = 400)
+````
+
+The location of metropolitan public transportation stations is the following:
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+##################
+## Geo-mapping. ##
+##################
+
+#metro
+metro <- read.csv('MetroStops.csv')
+metro$Parking <- as.numeric(metro$Parking)
+metro$Passengers.Daily <- as.numeric(metro$Passengers.Daily)
+
+## General map.
+map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom =11, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.1, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "Montgomery County, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
+  geom_point(data = metro,
+             aes(x = Lon, y = Lat, alpha = Parking, size = Passengers.Daily), fill="blue", shape=23, size = 1.9) +   
+  scale_alpha(range = c(0.4, 0.8)) 
+````
+
+If we zoom over Rockville, the metro stations are the following
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+
+
+## Zoom Rockville
+map <- get_map(location = c(lon = -77.15, lat = 39.09), zoom =14, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "Rockville, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
+  geom_point(data = metro,
+             aes(x = Lon, y = Lat, alpha = Parking, size = Passengers.Daily), fill="blue", shape=23, size = 1.9) + 
+  scale_alpha(range = c(0.4, 0.8)) 
+````
+
+If we zoom over North Bethesda, the metro stations are the following
+
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+
+## Zoom North Bethesda
+map <- get_map(location = c(lon = -77.1, lat = 39.06), zoom =13, maptype = "roadmap")
+
+alcohol.map <- ggmap(map,  extent="panel") %+%
+  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
+  aes(x = New.Lon, y = New.Lat) +
+  stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  #scale_alpha(range = c(0.1, 0.3)) +
+  labs(x = "Longitude", y = "Latitude", title = "North Bethesda, Maryland") +
+  theme(legend.position = "none") +
+  coord_map()
+
+alcohol.map +
+  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
+  geom_point(data = metro,
+             aes(x = Lon, y = Lat, alpha = Parking, size = Passengers.Daily), fill="blue", shape=23, size = 1.9) + 
+  scale_alpha(range = c(0.4, 0.8)) 

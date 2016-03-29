@@ -1,10 +1,9 @@
 ---
 title: EDAV Project 3 - Alcohol-related traffic violations in Montgomery county of
   Maryland
-author: Aleksandr Makarov, Diego Llarrull, Kourtney Traina, Manuel Rueda, Ryan Walsh,
-  Sergey Ulyanenko
+author: Team DC
 date: "March 23, 2016"
-output: html_document
+output: pdf_document
 ---
 
 With this project, we aim to present a simple yet cohesive and concluding approach to one of the most relevant application fields in Data Science: smart city planning. For this purpose, we targeted a relatively small and simple dataset that contains all traffic violations since 2012 in Montgomery County, Maryland. This dataset, though simple, provides very accurate and descriptive information on the nature of the traffic violations. In particular, we will focus on traffic violations with a specific nature: alcohol consumption-driven traffic violations. We chose this particular subset in order to provide sound and conclusive insight on how to potentially reduce those traffic violations, which are responsible for a significant amount of deaths and injuries.
@@ -311,7 +310,7 @@ Black diamonds represent public places, where the size of each diamond stands fo
 
 
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 6, fig.height = 8}
 
 #################
 ## Exploratory ##
@@ -391,18 +390,20 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
 alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 3.5,]),
-             aes(x = longitude, y = latitude, alpha = 6**rating, size = 2**rating),
+             aes(x = longitude, y = latitude, alpha = 6**rating, size = 1.5**rating),
              fill="black", shape=23) + 
   geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
+             aes(x = Lon, y = Lat, size = 12), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 ```
+<br>
 ![](./map_legend.png)
+<br>
 
 In general, the map suggests that those violation clusters indeed correlate with certain popular public places and transportation stations. A closer look at different areas provides additional insight: 
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 6, fig.height = 8}
 ## Zoom 1 (Germantown).
 map <- get_map(location = c(lon = -77.26, lat = 39.18), zoom =13, maptype = "roadmap")
 
@@ -422,10 +423,10 @@ germantown <-
   alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = 1.5*rating),
              fill="black", shape=23, alpha = 0.8) + 
   geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
+             aes(x = Lon, y = Lat, size = 12), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 ## Zoom 2 (Rockville).
@@ -445,10 +446,10 @@ rockville <-
   alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = 1.5*rating),
              fill="black", shape=23, alpha = 0.8) + 
   geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
+             aes(x = Lon, y = Lat, size = 12), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 ## Zoom 3 (North Bethesda).
@@ -468,10 +469,10 @@ northbethesda <-
   alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = 1.5*rating),
              fill="black", shape=23, alpha = 0.8) + 
   geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
+             aes(x = Lon, y = Lat, size = 12), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 ## Zoom 4 (Bethesda).
@@ -491,30 +492,45 @@ bethesda <-
   alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = 1.5*rating),
              fill="black", shape=23, alpha = 0.8) + 
   geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
+             aes(x = Lon, y = Lat, size = 12), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 germantown
 ```
+
+<br>
 ![](./map_legend.png)
-```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+<br>
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 6, fig.height = 8}
 
 rockville
 ```
+
+<br>
 ![](./map_legend.png)
-```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+<br>
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 6, fig.height = 8}
 
 northbethesda
 ```
+
+<br>
 ![](./map_legend.png)
-```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+<br>
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 6, fig.height = 8}
 
 bethesda
 ```
+
+<br>
 ![](./map_legend.png)
+<br>
 
 Throughout these maps we actually find 3 different types of clusters based on the objects around them:
 

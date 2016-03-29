@@ -295,7 +295,7 @@ As a possible preliminary explanation, this clustering of traffic violations cou
 
 Black diamonds represent public places, where the size of each diamond stands for the rating of this place on *Yelp* — the proxy variable for the popularity of the place that we decided to use in our analysis.
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE}
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
 
 #################
 ## Exploratory ##
@@ -383,7 +383,7 @@ alcohol.map +
 
 In general, the map suggests that those violation clusters indeed correlate with certain popular public places and transportation stations. A closer look at different areas provides additional insight: 
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE}
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
 ## Zoom 1 (Germantown).
 map <- get_map(location = c(lon = -77.26, lat = 39.18), zoom =13, maptype = "roadmap")
 

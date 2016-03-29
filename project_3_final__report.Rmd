@@ -482,8 +482,28 @@ northbethesda
 bethesda
 ```
 
-Throughout these maps we actually find 3 different clusters based on the objects around them:
+Throughout these maps we actually find 3 different types of clusters based on the objects around them:
 
-1. **Clusters with bars around**: the most common pattern on the map, which 
-2. **Clusters with bars and subway stops around**
-3. **Unidentified Clusters**
+1. **Clusters with bars around**: the most common pattern on the map, which supports our hypothesis that the majority of alcohol-related incidents are registered in the immediate neighbohoods of public drinking places. As expected, bars with higher rating attract more people and are placed in the more convenient locations. Consequently, they attract more people who may, eventually, violate traffic laws by driving back home after drinking.
+
+2. **Clusters with bars and subway stops around**: when public commute stations and bar places coincide in the same area, the cluster of alcohol violations becomes heavier, following what was predicted by the previous hypothesis. The explanation for this pattern could be the fact that a considerable amount of people who reside in the county actually work in *Washington, DC* and commute there on a regular basis. Their most probable route involves driving from their homes to the nearest railroad stations towards *DC*, leaving their cars on nearby parking lots and changing for a train to the city. Hence, once they are coming back after a night out in *Washington*, they take cars and drive home with alcohol in their blood, violating traffic laws. Police is certainly aware of this pattern and keeps patroling these spots as the size of this family of cluster is very significant.
+
+3. **Unidentified Clusters**: finally, there is a cluster in *Germantown* with seemingly few bars in the nearest surroundings, though several of them are located East of the road where these violations were registered. We do not have data to support this hypothesis, but the most reasonable explanation is that those drivers were heading out from these bar places towards the nearest highway to reach their homes after their time out. Road police was patrolling this road as it could be presumably the most convenient patrolling spot for them to prevent traffic violations in this district.
+
+All these suggestions are coming directly from the visual facts that are discovered through this brief analysis. However, proving or disproving them requires more complex analysis which goes beyond the exploratory analysis covered in this paper.
+
+##Conclusion
+
+Throughout the analysis we revealed a set of certain spatial and temporal patterns in alcohol-related traffic violations observed in residential counties in the US based on the expample of Montgomery county, Maryland.
+
+***Main conclusions contain the following points:***
+
++ There is little variation of alcohol violations registered per month, and all the increases, though slight, are observed during the months with public holidays in them.
+
++ The distribution of the violations by day of the week and by hour is easily explained by the most common social behavior during the week span — citizens tend to go out more in the night hours on Fridays and Saturdays.
+
++ Bar locations are indeed the places where the biggest portion of alcohol violations are caught, and police is perfectly aware of these hot points and has set up patroling units in accordance to this information. Subway/railroad stops are also the points of attention for police patrols. However, these stops almost always overlay with bar locations and places of public attraction, thus increasing an already high number of traffic violations in those areas.
+
++ There is a lack of public transportation from 12AM to 5AM. This time period actually coincides with the hours where most tickets are issued. Though on the previous section we fine-grained the analysis on the clusters so as to show that this lack of public transportation might not be the exclusive reason for the occurrence of alcohol-related violations, we still consider that providing night-shift service on those routes will certainly diminish the amount of incidents.
+
+

@@ -14,10 +14,10 @@ This project is divided in three sections: in the first one, we will provide som
 ##The Montgomery County Data Set
 
 
-From the entire dataset, and as depicted in the plot below, we will only focus on alcohol-induced traffic violations, which only constitute $3.6\%$ of the entire dataset. Even though this proportion might seem small, in subsequent sections we will show that the volume of data is adequate to provide insight on the current situation in the county of Montgomery.
+From the entire dataset, and as depicted in the plots below, we will only focus on alcohol-induced traffic violations, which only constitute $3.6\%$ of the entire dataset. Even though this proportion might seem small, in subsequent sections we will show that the volume of data is adequate to provide insight on the current situation in the county of Montgomery.
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 5}
 #-------------
 #Loading and Cleaning Data
 #-------------
@@ -28,6 +28,7 @@ library(ggplot2)
 library(scales)
 library(ggmap)
 library(animation)
+require(gridExtra)
 
 #mydata = read.csv('D:/Documents/Project_3/Traffic_Violations_alcohol.csv',header = TRUE)
 mydata = read.csv('clean-data/Traffic_Violations_alcohol.csv',header = TRUE)
@@ -36,35 +37,100 @@ mydata = read.csv('clean-data/Traffic_Violations_alcohol.csv',header = TRUE)
 alc_share = data.frame(violation=c("Non-alcohol violations","Alcohol violations"),count=c(815245,30653))
 alc_share$percent = alc_share$count / sum(alc_share$count) 
 alc_share$pos= cumsum(alc_share$percent) - 0.5 * alc_share$percent 
-ggplot(data=alc_share,aes(x=factor(1),y=percent,fill=factor(violation)))+
+plot1 <- ggplot(data=alc_share,aes(x=factor(1),y=percent,fill=factor(violation)))+
   geom_bar(width=1,stat="identity")+
   coord_polar(theta="y")+
   geom_text(aes(x=1.1,y=pos,label=percent(percent)),size=4)+
-  ggtitle("Percentage share of alcohol related violations")+
+  ggtitle("Percentage share of\nalcohol related violations")+
   xlab('')+ylab('percent')+labs(fill="Violation")+
   scale_fill_brewer(palette = "Paired")+
   theme_light()+
-  theme(legend.title=element_blank(), plot.title = element_text(size=15),
+  theme(legend.title=element_blank(), plot.title = element_text(size=12, lineheight=.8),
         panel.grid=element_blank(),axis.text=element_blank(),
+        panel.border = element_blank(),
         axis.title.x=element_blank(),legend.position="bottom")
-```
-----
 
-As the plot below shows, the number of traffic violations triggered by alcohol consumption has been steadily increasing over year, and the trend for 2016 seems to go in the same direction. Consequently, we consider that tackling ways to reduce this number is not only reasonable but also desired.
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+# #dat <- read.csv("clean-data/Traffic_Violations_alcohol.csv", stringsAsFactors = F)
+# dat <- mydata
+# 
+# #dataframe of stops with of fatalities or injuries
+ dat_fatal <- mydata %>%
+   filter(Fatal == 'Yes' | Personal.Injury == "Yes")
+# 
+# #Ensure the car makes are uniform
+# dat_fatal$Make[dat_fatal$Make == "HOND"] = "HONDA"
+# dat_fatal$Make[dat_fatal$Make == "CHRYS"] = "CHRYSLER"
+# dat_fatal$Make[dat_fatal$Make == "MITS"] = "MITSUBISHI"
+# dat_fatal$Make[dat_fatal$Make == "MERC"] = "MERCURY"
+# dat_fatal$Make[dat_fatal$Make == "ACUR"] = "ACURA"
+# dat_fatal$Make[dat_fatal$Make == "CHEV"] = "CHEVROLET"
+# dat_fatal$Make[dat_fatal$Make == "CHEVY"] = "CHEVROLET"
+# dat_fatal$Make[dat_fatal$Make == "CHRY"] = "CHRYSLER"
+# dat_fatal$Make[dat_fatal$Make == "DODG"] = "DODGE"
+# dat_fatal$Make[dat_fatal$Make == "HYUN"] = "HYUNDAI"
+# dat_fatal$Make[dat_fatal$Make == "MADZA"] = "MAZDA"
+# dat_fatal$Make[dat_fatal$Make == "VOLV"] = "VOLVO"
+# dat_fatal$Make[dat_fatal$Make == "TOYT"] = "TOYOTA"
+# dat_fatal$Make[dat_fatal$Make == "VOLKS"] = "VOLKSWAGON"
+# dat_fatal$Make[dat_fatal$Make == "TOYO"] = "TOYOTA"
+# dat_fatal$Make[dat_fatal$Make == "MERCEDEZ"] = "MERCEDES"
+# dat_fatal$Make[dat_fatal$Make == "HYUNDIA"] = "HYUNDAI"
+# dat_fatal$Make[dat_fatal$Make == "INFI"] = "INFINITY"
+# dat_fatal$Make[dat_fatal$Make == "IZUZU"] = "ISUZU"
+# dat_fatal$Make[dat_fatal$Make == "NISS"] = "NISSAN"
+# dat_fatal$Make[dat_fatal$Make == "NISSIAN"] = "NISSAN"
+# dat_fatal$Make[dat_fatal$Make == "TOTY"] = "TOYOTA"
+# 
+# car make and injuries
+ #year_injury <- ggplot(dat_fatal, aes(Year))
+ #year_injury + geom_bar() + theme(axis.text.x = element_text(angle = 90))
+
+ dat_fatal[,"InjuryYear"] <- NA
+ plot2 <- dat_fatal %>%
+  mutate(InjuryYear = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%Y"))) %>%
+  group_by(InjuryYear) %>%
+  tally() %>%
+  ggplot(aes(x=InjuryYear,y=n,fill=InjuryYear)) + geom_bar(stat = "identity") +
+  xlab('Year')+ylab('Deaths/injuries')+
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=12,lineheight=.8),
+                      axis.text.x = element_text(angle = 45, hjust = 1))+
+  ggtitle("\n\n\nNumber of deaths/injuries by\nalcohol-related traffic violations")
+
+# 
+# 
+# #car make and injuries, separated by police subagency
+# make_injury_agency <- ggplot(dat_fatal, aes(factor(Make), fill = SubAgency)) + 
+#   geom_bar() + theme(axis.text.x = element_text(angle = 90))
+# make_injury_agency
+# 
+# #seatbelts and injury??? This doesn't seem right?
+# #seatbelts for all alcohol related stops
+# seatbelt_injury <- ggplot(dat, aes(factor(Belts))) + geom_bar()
+# seatbelt_injury
+# 
+# #seatbelts for alcohol-related stops with injuries or fatalities
+# seatbelt_injury2 <- ggplot(dat_fatal, aes(factor(Belts))) + geom_bar()
+# seatbelt_injury2
+ 
+
 ## Violations by Year.
-mydata %>%
+plot3 <- mydata %>%
   mutate(Year = as.numeric(format(as.POSIXct(Date.Of.Stop, format="%m/%d/%Y"),"%Y"))) %>%
   group_by(Year) %>%
   tally() %>%
   ggplot(aes(x=Year,y=n,fill=Year)) + geom_bar(stat = "identity") +
   xlab('Year')+ylab('Number of violations')+
-  theme_light()+theme(legend.position = "none",plot.title = element_text(size=15),
+  theme_light()+theme(legend.position = "none",plot.title = element_text(size=12,lineheight=.8),
                       axis.text.x = element_text(angle = 45, hjust = 1))+
-  ggtitle("Total Violations by Year")
+  ggtitle("\n\n\nAlcohol-related\ntraffic violations by year")
+
+grid.arrange(plot1, plot2, plot3, ncol=3)
 ```
-----
+
+
+This family of traffic violations actually accounted for 9 deaths and almost 900 injured people since 2012, as the second plot above shows.
+This decrease in the number of injured might suggest a reduction on the number of accidents. However, as the third plot shows, the number of traffic violations triggered by alcohol consumption has been steadily increasing over year, and the trend for 2016 seems to go in the same direction. Consequently, we consider that tackling ways to reduce this number is not only reasonable but also desired, as the number of injured people remains high.
 
 In order to understand the nature of these traffic violations, we decided to analyse the time of occurrence of this violations, considering three different axes: **day**, **time of the day** and the combination of both axes (**time of the day over each day**, displayed as a trellis plot). All three plots are displayed below:
 
@@ -189,7 +255,7 @@ alcohol <- data[grepl('ALCOHOL',data$Description),]
 
 ## Geographical Exploration of Traffic Violations
 
-The second part of our story focuses on geographical aspects of the phenomenon we are exploring. At first, we wanted to take a look at the distribution of the traffic violations among the administrative territorial districts that are called **police districts** in the dataset we are working with. The are 7 main districts in Montgomery county and, obviously, they demonstrate different frequency of violations — both overall and alcohol-related ones.
+The second part of our story focuses on geographical aspects of the phenomenon we are exploring. At first, we wanted to take a look at the distribution of the traffic violations among the administrative territorial districts that are called **police districts** in the dataset we are working with. The are 7 main districts in Montgomery county and, obviously, they demonstrate different frequency of violations ?????both overall and alcohol-related ones.
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE}
 
@@ -227,7 +293,7 @@ map <- get_map(location = c(lon = -77.129074, lat = 39.10359), zoom = 11,maptype
 
 We dive deeper into exploring the geographical structure of alcohol violations distribution by plotting them on a map:
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE}
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
 
 ##map of alcohol violations only
 ggmap(map,extent = 'device') + 
@@ -239,61 +305,11 @@ ggmap(map,extent = 'device') +
 
 The very first thing that we directly observe from this map is the fact that ***violations tend to cluster around certain points***. What is more, ***each district has their own centers of gravity***, which we will try to discover further on.
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE}
-# #dat <- read.csv("clean-data/Traffic_Violations_alcohol.csv", stringsAsFactors = F)
-# dat <- mydata
-# 
-# #dataframe of stops with of fatalities or injuries
-# dat_fatal <- dat %>%
-#   filter(Fatal == 'Yes' | Personal.Injury == "Yes")
-# 
-# #Ensure the car makes are uniform
-# dat_fatal$Make[dat_fatal$Make == "HOND"] = "HONDA"
-# dat_fatal$Make[dat_fatal$Make == "CHRYS"] = "CHRYSLER"
-# dat_fatal$Make[dat_fatal$Make == "MITS"] = "MITSUBISHI"
-# dat_fatal$Make[dat_fatal$Make == "MERC"] = "MERCURY"
-# dat_fatal$Make[dat_fatal$Make == "ACUR"] = "ACURA"
-# dat_fatal$Make[dat_fatal$Make == "CHEV"] = "CHEVROLET"
-# dat_fatal$Make[dat_fatal$Make == "CHEVY"] = "CHEVROLET"
-# dat_fatal$Make[dat_fatal$Make == "CHRY"] = "CHRYSLER"
-# dat_fatal$Make[dat_fatal$Make == "DODG"] = "DODGE"
-# dat_fatal$Make[dat_fatal$Make == "HYUN"] = "HYUNDAI"
-# dat_fatal$Make[dat_fatal$Make == "MADZA"] = "MAZDA"
-# dat_fatal$Make[dat_fatal$Make == "VOLV"] = "VOLVO"
-# dat_fatal$Make[dat_fatal$Make == "TOYT"] = "TOYOTA"
-# dat_fatal$Make[dat_fatal$Make == "VOLKS"] = "VOLKSWAGON"
-# dat_fatal$Make[dat_fatal$Make == "TOYO"] = "TOYOTA"
-# dat_fatal$Make[dat_fatal$Make == "MERCEDEZ"] = "MERCEDES"
-# dat_fatal$Make[dat_fatal$Make == "HYUNDIA"] = "HYUNDAI"
-# dat_fatal$Make[dat_fatal$Make == "INFI"] = "INFINITY"
-# dat_fatal$Make[dat_fatal$Make == "IZUZU"] = "ISUZU"
-# dat_fatal$Make[dat_fatal$Make == "NISS"] = "NISSAN"
-# dat_fatal$Make[dat_fatal$Make == "NISSIAN"] = "NISSAN"
-# dat_fatal$Make[dat_fatal$Make == "TOTY"] = "TOYOTA"
-# 
-# #car make and injuries
-# make_injury <- ggplot(dat_fatal, aes(factor(Make)))
-# make_injury + geom_bar() + theme(axis.text.x = element_text(angle = 90))
-# 
-# 
-# #car make and injuries, separated by police subagency
-# make_injury_agency <- ggplot(dat_fatal, aes(factor(Make), fill = SubAgency)) + 
-#   geom_bar() + theme(axis.text.x = element_text(angle = 90))
-# make_injury_agency
-# 
-# #seatbelts and injury??? This doesn't seem right?
-# #seatbelts for all alcohol related stops
-# seatbelt_injury <- ggplot(dat, aes(factor(Belts))) + geom_bar()
-# seatbelt_injury
-# 
-# #seatbelts for alcohol-related stops with injuries or fatalities
-# seatbelt_injury2 <- ggplot(dat_fatal, aes(factor(Belts))) + geom_bar()
-# seatbelt_injury2
-```
-
 As a possible preliminary explanation, this clustering of traffic violations could be related to the locations of bars, pubs and other drinking houses in the area. As a sidenote, we obtained these locations by scraping the public *Yelp API*. Especifically, we queries for bars and restaurants in Montgomery county, Maryland, with *alcohol* as a keyword. Additionally, subway station locations have been added to the map in order to better understand commuting patterns in the area.
 
-Black diamonds represent public places, where the size of each diamond stands for the rating of this place on *Yelp* — the proxy variable for the popularity of the place that we decided to use in our analysis.
+Black diamonds represent public places, where the size of each diamond stands for the rating of this place on *Yelp* ??? the proxy variable for the popularity of the place that we decided to use in our analysis.
+
+
 
 ```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
 
@@ -366,9 +382,11 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
   stat_density2d(aes(fill = ..level..), alpha = 0.1, geom = "polygon") +
   scale_fill_gradient(low = "orange", high = "red") +
   #scale_alpha(range = c(0.1, 0.3)) +
-  labs(x = "Longitude", y = "Latitude", title = "Montgomery County, Maryland") +
+  labs(x = "Longitude", y = "Latitude", title = "Bars, metro stations and alcohol violations in\n Montgomery County, Maryland") +
   theme(legend.position = "none") +
   coord_map()
+
+
 
 alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
@@ -380,6 +398,7 @@ alcohol.map +
   scale_alpha(range = c(0.4, 0.8))
 
 ```
+![](./map_legend.png)
 
 In general, the map suggests that those violation clusters indeed correlate with certain popular public places and transportation stations. A closer look at different areas provides additional insight: 
 
@@ -393,9 +412,11 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
   stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
   scale_fill_gradient(low = "orange", high = "red") +
   #scale_alpha(range = c(0.1, 0.3)) +
-  labs(x = "Longitude", y = "Latitude", title = "Germantown, Maryland") +
+  labs(x = "Longitude", y = "Latitude", title = "Bars, metro stations and alcohol violations in\nGermantown, Maryland") +
   theme(legend.position = "none") +
   coord_map()
+
+
 
 germantown <-
   alcohol.map +
@@ -416,7 +437,7 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
   stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
   scale_fill_gradient(low = "orange", high = "red") +
   #scale_alpha(range = c(0.1, 0.3)) +
-  labs(x = "Longitude", y = "Latitude", title = "Rockville, Maryland") +
+  labs(x = "Longitude", y = "Latitude", title = "Bars, metro stations and alcohol violations in\nRockville, Maryland") +
   theme(legend.position = "none") +
   coord_map()
 
@@ -439,7 +460,7 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
   stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
   scale_fill_gradient(low = "orange", high = "red") +
   #scale_alpha(range = c(0.1, 0.3)) +
-  labs(x = "Longitude", y = "Latitude", title = "North Bethesda, Maryland") +
+  labs(x = "Longitude", y = "Latitude", title = "Bars, metro stations and alcohol violations in\nNorth Bethesda, Maryland") +
   theme(legend.position = "none") +
   coord_map()
 
@@ -462,7 +483,7 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
   stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
   scale_fill_gradient(low = "orange", high = "red") +
   #scale_alpha(range = c(0.1, 0.3)) +
-  labs(x = "Longitude", y = "Latitude", title = "Bethesda, Maryland") +
+  labs(x = "Longitude", y = "Latitude", title = "Bars, metro stations and alcohol violations in\nBethesda, Maryland") +
   theme(legend.position = "none") +
   coord_map()
 
@@ -477,10 +498,23 @@ bethesda <-
   scale_alpha(range = c(0.4, 0.8))
 
 germantown
+```
+![](./map_legend.png)
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+
 rockville
+```
+![](./map_legend.png)
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+
 northbethesda
+```
+![](./map_legend.png)
+```{r,echo=FALSE,warning=FALSE,message=FALSE, fig.width = 10, fig.height = 8}
+
 bethesda
 ```
+![](./map_legend.png)
 
 Throughout these maps we actually find 3 different types of clusters based on the objects around them:
 
@@ -500,7 +534,7 @@ Throughout the analysis we revealed a set of certain spatial and temporal patter
 
 + There is little variation of alcohol violations registered per month, and all the increases, though slight, are observed during the months with public holidays in them.
 
-+ The distribution of the violations by day of the week and by hour is easily explained by the most common social behavior during the week span — citizens tend to go out more in the night hours on Fridays and Saturdays.
++ The distribution of the violations by day of the week and by hour is easily explained by the most common social behavior during the week span -- citizens tend to go out more in the night hours on Fridays and Saturdays.
 
 + Bar locations are indeed the places where the biggest portion of alcohol violations are caught, and police is perfectly aware of these hot points and has set up patroling units in accordance to this information. Subway/railroad stops are also the points of attention for police patrols. However, these stops almost always overlay with bar locations and places of public attraction, thus increasing an already high number of traffic violations in those areas.
 

@@ -7,15 +7,9 @@ library(animation)
 ## Exploratory ##
 #################
 
-## YELP DATA.
 yelp <- read.csv("yelp api/yelp.csv")
 yelp_rating <- read.csv("yelp api/yelp_rating.csv")
 yelp_distance <- read.csv("yelp api/yelp_distance.csv")
-
-## METRO DATA.
-metro <- read.csv('MetroStops.csv')
-metro$Parking <- as.numeric(metro$Parking)
-metro$Passengers.Daily <- as.numeric(metro$Passengers.Daily)
 
 dat <- read.csv("clean-data/Traffic_Violations_alcohol.csv", stringsAsFactors = F)
 ## Latitude and longitude coordinates are (sometimes) incorrect...
@@ -80,14 +74,12 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
 alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.3, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 3.5,]),
-             aes(x = longitude, y = latitude, alpha = 2**rating, size = 2**rating),
+             aes(x = longitude, y = latitude, alpha = 6**rating, size = 2**rating),
              fill="black", shape=23) + 
-  geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 
-## Zoom 1 (Germantown).
+## Zoom 1.
 map <- get_map(location = c(lon = -77.26, lat = 39.18), zoom =13, maptype = "roadmap")
 
 alcohol.map <- ggmap(map,  extent="panel") %+%
@@ -103,13 +95,11 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
 alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = rating),
              fill="black", shape=23, alpha = 0.8) + 
-  geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
-## Zoom 2 (Rockville).
+## Zoom 2.
 map <- get_map(location = c(lon = -77.15, lat = 39.09), zoom =14, maptype = "roadmap")
 
 alcohol.map <- ggmap(map,  extent="panel") %+%
@@ -125,13 +115,11 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
 alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = rating),
              fill="black", shape=23, alpha = 0.8) + 
-  geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
-## Zoom 3 (North Bethesda).
+## Zoom 3.
 map <- get_map(location = c(lon = -77.1, lat = 39.06), zoom =13, maptype = "roadmap")
 
 alcohol.map <- ggmap(map,  extent="panel") %+%
@@ -147,32 +135,8 @@ alcohol.map <- ggmap(map,  extent="panel") %+%
 alcohol.map +
   geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
   geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
+             aes(x = longitude, y = latitude, size = rating),
              fill="black", shape=23, alpha = 0.8) + 
-  geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
-  scale_alpha(range = c(0.4, 0.8))
-
-## Zoom 4 (Bethesda).
-map <- get_map(location = c(lon = -77.07, lat = 38.985), zoom =13, maptype = "roadmap")
-
-alcohol.map <- ggmap(map,  extent="panel") %+%
-  unique(dat[!is.na(dat$New.Lat),c("New.Lat", "New.Lon")]) +
-  aes(x = New.Lon, y = New.Lat) +
-  stat_density2d(aes(fill = ..level..), alpha = 0.2, geom = "polygon") +
-  scale_fill_gradient(low = "orange", high = "red") +
-  #scale_alpha(range = c(0.1, 0.3)) +
-  labs(x = "Longitude", y = "Latitude", title = "Bethesda, Maryland") +
-  theme(legend.position = "none") +
-  coord_map()
-
-alcohol.map +
-  geom_point(aes(x = New.Lon, y = New.Lat), fill="red", shape=21, alpha=0.5, size = 1) +
-  geom_point(data = unique(yelp_rating[yelp_rating$rating >= 0,]),
-             aes(x = longitude, y = latitude, size = 2*rating),
-             fill="black", shape=23, alpha = 0.8) + 
-  geom_point(data = metro,
-             aes(x = Lon, y = Lat, size = 15), alpha = 0.8, col="blue", shape=16) +
   scale_alpha(range = c(0.4, 0.8))
 
 ##################
